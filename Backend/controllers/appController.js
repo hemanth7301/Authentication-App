@@ -164,10 +164,37 @@ async function resetCreateSession(req, res) {
 }
 
 async function resetPassword(req, res) {
-  const { userName, password } = req.body;
   try {
+    const { userName, password } = req.body;
+    try {
+      userModel.findOne({ userName }).then((user) => {
+        bcrypt
+          .hash(password, 10)
+          .then((hashedPassword) => {
+            userModel.updateOne(
+              { userName: user.userName },
+              { password: hashedPassword },
+              function (error, data) {
+                if (error) throw error;
+                req.app.locals.resetSession = false;
+                return res.status(201).send({ msg: "Record Updated!" });
+              }
+            );
+          })
+          .catch((error) => {
+            return res
+              .status(500)
+              .send({ error: "Unable to hash the password" });
+          })
+          .catch((error) => {
+            return res.status(500).send({ error: "Unable to find the user" });
+          });
+      });
+    } catch (error) {
+      return res.status(500).send({ error });
+    }
   } catch (error) {
-    return res.status();
+    res.status(401).send({ error });
   }
 }
 
