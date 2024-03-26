@@ -1,10 +1,11 @@
 const { Router } = require("express");
 const controller = require("../controllers/appController");
 const { auth, localVariables } = require("../middleware/auth");
+const { registerMail } = require("../controllers/mailer");
 const router = Router();
 
 router.route("/register").post(controller.register);
-router.route("/registerMail").post();
+router.route("/registerMail").post(registerMail);
 router
   .route("/authenticate")
   .post(controller.verifyUser, (req, res) =>
